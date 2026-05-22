@@ -10,28 +10,55 @@ import Data.List
 -- Password generator
 
 ---- Converts the characters between a very specific clamped range that is more common to use in passwords - removing unprintable values
-toChar :: Int -> Char
-toChar x =  chr (base + (x `mod` range))
-            where
-                base  = 0x23
-                range = 0x7E - base + 1
+toChar :: Int -> Int -> Int -> Char
+toChar x base range =  chr (base + (x `mod` range))
+
+toLevelOnePass :: Int -> Char
+toLevelOnePass x =  toChar x base range
+                    where
+                        base  = 0x21
+                        range = 0x7E - base + 1
+
+toLevelTwoPass :: Int -> Char
+toLevelTwoPass x =  toChar x base range
+                    where
+                        base  = 0x2A
+                        range = 0x7A - base + 1
+
+toLevelThreePass :: Int -> Char
+toLevelThreePass x =    toChar x base range
+                        where
+                            base  = 0x41
+                            range = 0x7A - base + 1
 
 ---- Calculates a single character by taking (serviceName[i] % userName[i]) and folding an xor onto this value using the whole master password
-calculateServiceChar :: String -> Char -> Char -> Char
+calculateServiceChar :: String -> Char -> Char -> Int
 calculateServiceChar masterPassword serviceC userC =    let v       = (ord serviceC) `mod` (ord userC)
                                                             intMp   = map ord masterPassword
-                                                        in toChar (foldl' (\newv passC -> newv `xor` passC) v intMp)
+                                                        in  foldl' (\newv passC -> newv `xor` passC) v intMp
 
 ---- Calls calculateServiceChar for every character in the password
-calculateServicePassword :: String -> String -> String -> String
-calculateServicePassword masterPassword serviceName userName =  let sizedServiceName = take 30 (cycle serviceName) -- TODO: could do the modding here? that would look cleaner
+calculateServicePassword :: String -> String -> String -> [Int]
+calculateServicePassword masterPassword serviceName userName =  let sizedServiceName = take 30 (cycle serviceName)
                                                                     sizedUserName    = take 30 (cycle userName)
                                                                 in zipWith (calculateServiceChar sizedServiceName) sizedServiceName sizedUserName
 
 -- IO related section
 
 applyAccountInfo :: String -> String -> String -> InputT IO ()
-applyAccountInfo masterPassword serviceName userName = do   outputStrLn $ calculateServicePassword masterPassword serviceName userName
+applyAccountInfo masterPassword serviceName userName = do   let password = calculateServicePassword masterPassword serviceName userName
+
+                                                            outputStr $ "  Wide range password: "
+                                                            outputStrLn $ map toLevelOnePass password
+
+                                                            outputStr $ " Lower range password: "
+                                                            outputStrLn $ map toLevelTwoPass password
+
+                                                            outputStr $ "Lowest range password: "
+                                                            outputStrLn $ map toLevelThreePass password
+                                                            outputStrLn ""
+
+                                                            -- loop
                                                             getAccountInfo masterPassword
 
 
