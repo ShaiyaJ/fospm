@@ -62,6 +62,7 @@ applyAccountInfo masterPassword serviceName userName = do   let password = calcu
                                                             getAccountInfo masterPassword
 
 
+getAccountInfo :: String -> InputT IO ()
 getAccountInfo masterPassword = do  serviceName <- getInputLine "Service name (\"quit\" to quit): "
                                     let serviceNameInner = fromJust serviceName
 
