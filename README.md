@@ -1,6 +1,9 @@
+> [!WARNING]
+> Very bad security warning!
+> Use this instead if you like the idea but want it to be more secure: https://github.com/shaiyaj/fospm-hare
+
 # fospm
 The **f**ree **o**ffline **s**ynced **p**assword **m**anager.
-
 
 ## About
 Fospm is a command line utility that generates secure passwords. It's deterministic meaning that these passwords are *algorithmically* synced across devices. 
